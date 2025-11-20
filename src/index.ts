@@ -2,7 +2,8 @@
 import express, { Application, Request, Response } from 'express';
 import dotenv from 'dotenv';
 import { connectDB } from './config/db.config';
-// import restaurantRoutes from './routes/restaurant.routes';
+import cors from "cors";
+import restaurantRoutes from './routes/restaurant.routes';
 // import { errorHandler } from './middlewares/error.middleware';
 
 dotenv.config();
@@ -11,11 +12,18 @@ const app: Application = express();
 const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/restaurantDB';
 
+
+app.use(
+  cors({
+    origin: "http://localhost:5173", // your frontend URL
+    credentials: true,
+  })
+);
 // Middleware
 app.use(express.json());
 
 // Routes
-// app.use('/api/restaurants', restaurantRoutes);
+app.use('/api/restaurants', restaurantRoutes);
 
 // Health check
 app.get('/api/health', (req: Request, res: Response) => {
