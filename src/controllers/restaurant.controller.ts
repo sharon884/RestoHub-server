@@ -1,23 +1,73 @@
-import { Request, Response } from "express";
-import Restaurant from "../models/restaurant.model";
+//restaurant.controller.ts
 
-// Get all restaurants
-export const getRestaurants = async (req: Request, res: Response) => {
-  try {
-    const restaurants = await Restaurant.find();
-    res.json(restaurants);
-  } catch (error) {
-    res.status(500).json({ message: "Server Error", error });
-  }
+import { Request, Response } from 'express';
+import RestaurantModel from '../models/restaurant.model'; 
+import { CreateRestaurantInput } from '../schemas/restaurant.schema'; 
+import { StatusCodes } from '../utils/statusCodes'
+import { STATUS_CODES } from 'http';
+import { success } from 'zod/v4';
+
+
+export const addRestaurant = async (req: Request<{}, {}, CreateRestaurantInput>, res: Response) => {
+    try {
+        // The request body is strongly typed and guaranteed to be valid here
+        const data: CreateRestaurantInput = req.body; 
+
+        
+        const restaurantDataForDB = {
+            ...data,
+            location: {
+                type: 'Point',
+                coordinates: [data.longitude, data.latitude], 
+            },
+        };
+
+       
+        const newRestaurant = await RestaurantModel.create(restaurantDataForDB);
+        
+       
+        return res.status(StatusCodes.CREATED).json({ 
+            message: 'Restaurant created successfully', 
+            restaurant: newRestaurant.toObject() 
+        });
+
+    } catch (error) {
+       
+        console.error('Database Error:', error);
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ 
+            message: 'Server error during restaurant creation.', 
+            error 
+        });
+    }
 };
 
-// Add a new restaurant
-export const addRestaurant = async (req: Request, res: Response) => {
-  try {
-    const newRestaurant = new Restaurant(req.body);
-    const savedRestaurant = await newRestaurant.save();
-    res.status(201).json(savedRestaurant);
-  } catch (error) {
-    res.status(500).json({ message: "Server Error", error });
-  }
-};
+
+// export const getRestaurants = (req: Request, res: Response) => {
+//     return res.status(StatusCodes.OK).json({ message: 'Restaurant list endpoint - To be implemented.' });
+// };
+
+
+
+const getRestaurants =  async ( req, res ) => {
+
+   const restaurants  = await RestaurantModel.find();
+
+    if ( !restaurants ) {
+        return res.status(StatusCodes.NOT_FOUND).json({
+            message : "no resturenets",
+            success : false,
+        })
+    };
+
+
+    return res.status(StatusCodes.OK).json({
+        restaurants,
+        Message: "Resturant fetched successfully",
+        success : true,
+    });
+} catch ( error ) {
+    return resizeBy.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        message : "Internal server error ",
+        success : false,
+    })
+}

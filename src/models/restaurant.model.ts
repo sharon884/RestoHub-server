@@ -1,21 +1,68 @@
+// src/models/restaurant.model.ts
+
 import mongoose, { Document, Schema } from 'mongoose';
 
+// 1. Define the TypeScript Interface for Mongoose Documents
+// This ensures strong typing when querying the database
 export interface IRestaurant extends Document {
+  // User-provided fields
   name: string;
   address: string;
-  latitude: number;
-  longitude: number;
-  cuisine?: string;
-  rating?: number;
+  description: string;
+  cuisine: 'Italian' | 'Mexican' | 'Indian' | 'Japanese' | 'Other'; // Same Enums as Zod
+  priceRange: '£' | '££' | '£££' | '££££'; // Same Enums as Zod
+  imageUrl?: string;
+  
+  // System-controlled fields
+  averageRating: number; // Calculated field
+  location: {
+    type: 'Point'; // MongoDB GeoJSON type
+    coordinates: [number, number]; // [longitude, latitude]
+  };
+  
+  // Audit fields (automatically added by timestamps: true)
+  createdAt: Date;
+  updatedAt: Date;
 }
 
-const restaurantSchema = new Schema<IRestaurant>({
-  name: { type: String, required: true },
-  address: { type: String, required: true },
-  latitude: { type: Number, required: true },
-  longitude: { type: Number, required: true },
-  cuisine: { type: String },
-  rating: { type: Number, default: 0 },
-});
+// 2. Define the Mongoose Schema
+const RestaurantSchema = new Schema<IRestaurant>(
+  {
+    name: { type: String, required: true, trim: true },
+    address: { type: String, required: true, trim: true },
+    description: { type: String, required: true, trim: true },
+    
+    // Enums for data consistency
+    cuisine: { 
+        type: String, 
+        enum: ['Italian', 'Mexican', 'Indian', 'Japanese', 'Other'], 
+        required: true 
+    },
+    priceRange: { 
+        type: String, 
+        enum: ['£', '££', '£££', '££££'], 
+        required: true 
+    },
 
-export default mongoose.model<IRestaurant>('Restaurant', restaurantSchema);
+    // System-controlled fields
+    averageRating: { type: Number, default: 0, min: 0, max: 5 },
+    
+    // GeoJSON Field for advanced geospatial queries
+    location: {
+      type: { type: String, enum: ['Point'], default: 'Point' },
+      coordinates: { type: [Number], required: true }, // IMPORTANT: MongoDB stores as [longitude, latitude]
+    },
+    
+    imageUrl: { type: String, trim: true },
+  },
+  {
+    timestamps: true, // Auto-adds createdAt and updatedAt
+  }
+);
+
+// 3. Add Indexing for Performance
+// CRITICAL: Index for fast "restaurants near me" searches
+RestaurantSchema.index({ location: '2dsphere' }); 
+
+// 4. Create the Model
+export default mongoose.model<IRestaurant>('Restaurant', RestaurantSchema);

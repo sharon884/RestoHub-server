@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import { connectDB } from './config/db.config';
 import cors from "cors";
 import restaurantRoutes from './routes/restaurant.routes';
+import morgan from 'morgan';
 // import { errorHandler } from './middlewares/error.middleware';
 
 dotenv.config();
@@ -22,12 +23,20 @@ app.use(
 // Middleware
 app.use(express.json());
 
+app.use(morgan('dev'));
+
 // Routes
 app.use('/api/restaurants', restaurantRoutes);
 
 // Health check
 app.get('/api/health', (req: Request, res: Response) => {
   res.status(200).json({ success: true, message: 'Server is running' });
+});
+
+
+
+app.get('/test', (req, res) => {
+  res.json({ message: 'CORS is working!' });
 });
 
 // Error middleware (always last)
