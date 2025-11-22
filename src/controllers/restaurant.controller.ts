@@ -110,3 +110,34 @@ export const getRestaurants = async (
         });
     }
 };
+
+
+
+export const getRestaurantById = async (req: Request, res: Response) => {
+    try {
+        const { id } = req.params;
+
+        // Mongoose findById
+        const restaurant = await RestaurantModel.findById(id);
+
+        if (!restaurant) {
+            return res.status(StatusCodes.NOT_FOUND).json({
+                success: false,
+                message: "Restaurant not found.",
+            });
+        }
+
+        return res.status(StatusCodes.OK).json({
+            success: true,
+            message: "Restaurant fetched successfully.",
+            data: restaurant,
+        });
+
+    } catch (error) {
+        console.error('Get By ID Error:', error);
+        return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            success: false,
+            message: "Error fetching restaurant details.",
+        });
+    }
+};

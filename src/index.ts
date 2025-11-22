@@ -17,6 +17,7 @@ const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/restaurant
 app.use(
   cors({
     origin: "http://localhost:5173", // your frontend URL
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true,
   })
 );
