@@ -1,18 +1,17 @@
-// src/schemas/restaurant.schema.ts
 
 import { z } from 'zod';
 
-// Define Reusable Enums for filtering and consistency
-// FIX: Changed 'errorMap' to 'message'
+// Reusable Enums for filtering and consistency
+
 export const CuisineEnum = z.enum(['Italian', 'Mexican', 'Indian', 'Japanese', 'Other'], {
   message: 'Please select a valid cuisine type.',
 });
 
-export const PriceRangeEnum = z.enum(['£', '££', '£££', '££££'], {
+export const PriceRangeEnum = z.enum(['₹' ,'₹₹', '₹₹₹','₹₹₹₹'], {
   message: 'Please select a valid price range.',
 });
 
-// Schema for creating a new restaurant (User Input)
+// Schema for creating a new restaurant
 export const createRestaurantSchema = z.object({
   name: z.string().min(3, { message: 'Restaurant name must be at least 3 characters.' }).trim(),
   address: z.string().min(10, { message: 'A detailed address is required.' }).trim(),

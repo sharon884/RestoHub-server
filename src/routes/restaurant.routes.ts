@@ -11,10 +11,9 @@ const router = express.Router();
 router.get("/", getRestaurants);
 
 // POST a new restaurant
-// 1. Validation Middleware runs first
-// 2. Controller function runs next if validation passes
 router.post("/", validate(createRestaurantSchema), addRestaurant);
 
+// GET a restaurant by ID
 router.get("/:id", getRestaurantById);
 
 export default router;
